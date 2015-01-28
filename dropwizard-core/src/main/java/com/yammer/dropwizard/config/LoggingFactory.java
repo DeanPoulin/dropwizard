@@ -61,6 +61,18 @@ public class LoggingFactory {
             root.addAppender(AsyncAppender.wrap(LogbackFactory.buildFileAppender(file,
                                                                                  root.getLoggerContext(),
                                                                                  file.getLogFormat())));
+            
+            for (AppenderConfiguration appender : config.getFileConfiguration().getAppenders()) {
+                if (appender.isEnabled()) {
+                    final Logger additionalLogger = (Logger) LoggerFactory.getLogger(appender.getLogger());
+                    
+                    additionalLogger.setAdditive(appender.isAdditive());
+                    additionalLogger.addAppender(AsyncAppender.wrap(LogbackFactory.buildFileAppender(appender, 
+                                                                                                     additionalLogger.getLoggerContext(), 
+                                                                                                     appender.getLogFormat())));
+                }
+            }
+            
         }
 
         final SyslogConfiguration syslog = config.getSyslogConfiguration();
@@ -70,10 +82,9 @@ public class LoggingFactory {
                                                                                    name,
                                                                                    syslog.getLogFormat())));
         }
-
-
-
+        
         final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+        
         try {
             final ObjectName objectName = new ObjectName("com.yammer:type=Logging");
             if (!server.isRegistered(objectName)) {

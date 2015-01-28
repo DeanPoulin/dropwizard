@@ -1,6 +1,7 @@
 package com.yammer.dropwizard.config;
 
 import ch.qos.logback.classic.Level;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -12,6 +13,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -96,6 +100,9 @@ public class LoggingConfiguration {
 
         @JsonProperty
         private String logFormat;
+        
+        @JsonProperty
+        private List<AppenderConfiguration> appenders = new ArrayList<AppenderConfiguration>();
 
         @ValidationMethod(message = "must have logging.file.archivedLogFilenamePattern if logging.file.archive is true")
         public boolean isValidArchiveConfiguration() {
@@ -114,7 +121,7 @@ public class LoggingConfiguration {
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
         }
-
+        
         public Level getThreshold() {
             return threshold;
         }
@@ -170,8 +177,40 @@ public class LoggingConfiguration {
         public void setLogFormat(String logFormat) {
             this.logFormat = logFormat;
         }
+        
+        public List<AppenderConfiguration> getAppenders() {
+            return this.appenders;
+        }
+        
+        public void setAppenders(List<AppenderConfiguration> appenders) {
+            this.appenders = appenders;
+        }
     }
+    
+    public static class AppenderConfiguration extends FileConfiguration {
+        @JsonProperty
+        private boolean additive = true;
+        
+        @JsonProperty
+        private String logger;
+        
+        public boolean isAdditive() {
+            return additive;
+        }
 
+        public void setAdditive(boolean additive) {
+            this.additive = additive;
+        }
+        
+        public String getLogger() {
+            return this.logger;
+        }
+
+        public void setLogger(String logger) {
+            this.logger = logger;
+        }
+    }
+    
     public static class SyslogConfiguration {
         public enum Facility {
             AUTH, AUTHPRIV, DAEMON, CRON, FTP, LPR, KERN, MAIL, NEWS, SYSLOG, USER, UUCP,
