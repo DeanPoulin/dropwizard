@@ -10,6 +10,18 @@ file:
   currentLogFilename: ./logs/example.log
   archivedLogFilenamePattern: ./logs/example-%d.log.gz
   archivedFileCount: 5
+  appenders:
+  - enabled: true
+    threshold: INFO
+    currentLogFilename: ./logs/activity.log
+    archivedLogFilenamePattern: ./logs/activity-%d.log.gz
+    logger: com.example.app.logging.LoggingFilter
+    additive: false
+  - enabled: true
+    threshold: DEBUG
+    currentLogFilename: ./logs/foo.log
+    archivedLogFilenamePattern: ./logs/foo-%d.log.gz
+    logger: com.example.app.logging.Foo
 syslog:
   enabled: false
   host: localhost

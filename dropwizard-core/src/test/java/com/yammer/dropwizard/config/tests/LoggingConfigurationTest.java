@@ -1,15 +1,19 @@
 package com.yammer.dropwizard.config.tests;
 
 import ch.qos.logback.classic.Level;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.yammer.dropwizard.config.ConfigurationFactory;
 import com.yammer.dropwizard.config.LoggingConfiguration;
+import com.yammer.dropwizard.config.LoggingConfiguration.AppenderConfiguration;
 import com.yammer.dropwizard.validation.Validator;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.List;
 
 import static com.yammer.dropwizard.config.LoggingConfiguration.ConsoleConfiguration;
 import static com.yammer.dropwizard.config.LoggingConfiguration.FileConfiguration;
@@ -77,5 +81,64 @@ public class LoggingConfigurationTest {
 
         assertThat(file.isValidArchiveConfiguration())
                 .isTrue();
+    }
+    
+    @Test
+    public void hasAdditionalAppenders() {
+        final FileConfiguration file = config.getFileConfiguration();
+        
+        List<AppenderConfiguration> appenders = file.getAppenders();
+        
+        assertThat(appenders)
+            .isNotNull();
+        
+        assertThat(appenders.size())
+            .isEqualTo(2);
+    }
+    
+    @Test
+    public void firstFileAppenderIsConfiguredCorrectly() {
+        AppenderConfiguration firstAppender = config.getFileConfiguration().getAppenders().get(0);
+    
+        assertThat(firstAppender)
+            .isNotNull();
+        
+        assertThat(firstAppender.isAdditive())
+            .isFalse();
+        
+        assertThat(firstAppender.getCurrentLogFilename())
+            .isEqualTo("./logs/activity.log");
+        
+        assertThat(firstAppender.getThreshold())
+            .isEqualTo(Level.INFO);
+        
+        assertThat(firstAppender.getArchivedLogFilenamePattern())
+            .isEqualTo("./logs/activity-%d.log.gz");
+        
+        assertThat(firstAppender.getLogger())
+            .isEqualTo("com.example.app.logging.LoggingFilter");        
+    }
+    
+    @Test
+    public void secondFileAppenderIsConfiguredCorrectly() {
+        AppenderConfiguration secondAppender = config.getFileConfiguration().getAppenders().get(1);
+    
+        assertThat(secondAppender)
+            .isNotNull();
+        
+        assertThat(secondAppender.isAdditive())
+            .isTrue();
+        
+        assertThat(secondAppender.getThreshold())
+            .isEqualTo(Level.DEBUG);
+        
+        assertThat(secondAppender.getCurrentLogFilename())
+            .isEqualTo("./logs/foo.log");
+        
+        assertThat(secondAppender.getArchivedLogFilenamePattern())
+            .isEqualTo("./logs/foo-%d.log.gz");
+        
+        assertThat(secondAppender.getLogger())
+            .isEqualTo("com.example.app.logging.Foo");
     }
 }
